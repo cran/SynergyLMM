@@ -61,9 +61,6 @@ CookDistance(lmm_ex_var)
 ## ----fig.width=10, fig.height=8-----------------------------------------------
 logLikSubjectDisplacements(lmm_ex_var, var_name = "SampleID")
 
-## ----fig.width=12, fig.height=10----------------------------------------------
-bliss <- lmmSynergy(lmm_ex_var, method = "Bliss")
-
 ## ----error=TRUE---------------------------------------------------------------
 try({
 bliss <- lmmSynergy(lmm_ex_var, method = "Bliss", robust = TRUE)

@@ -1,6 +1,6 @@
-8b4bc00db5a0542acbc0b10071815f29 *DESCRIPTION
+7b4e06ace8b4b548139e94f6b4ff97ad *DESCRIPTION
 60bf04af1049a73585921d4ec3bbc5cc *NAMESPACE
-2ca0ab8d711957c18c6f90f3c74d368f *NEWS.md
+651d952a9a350d378618b1706fa83343 *NEWS.md
 b89674a84e5005beb1dfba16af32a234 *R/APrioriPwr.R
 2d82ba65c16baa4432df82151e101899 *R/CookDistance.R
 b0392b23ae9cf16cec3b27f2a0c078cc *R/ObsvsPred.R
@@ -27,9 +27,9 @@ a67581f3e8e0622677dd0d3959def3f0 *R/ranefDiagnostics.R
 aa5e5a2cbfaea3d9b6cdbe378ac48cee *build/partial.rdb
 42fc2e050b0b2207369c981897d8bda8 *build/vignette.rds
 e7405520fc141e78a993d364614034fb *data/grwth_data.rda
-2e0fd8cb5fe9c9b42893112ab315f726 *inst/doc/SynergyLMM.R
-b7c486ae65e101a1321505e5d792847a *inst/doc/SynergyLMM.Rmd
-2dd0b2c7cf98e320ee110c9e6d23308f *inst/doc/SynergyLMM.html
+5ff1b7b818dc33fd3cc46de0ea42f2ed *inst/doc/SynergyLMM.R
+c9893542a723b120efe7a0fd1945adef *inst/doc/SynergyLMM.Rmd
+032bd5e8645e2893e1d5e7be80c0c7fe *inst/doc/SynergyLMM.html
 c1feb7c8d6e696c3251f3b94a1b6b4b3 *man/APrioriPwr.Rd
 d7d3ec3d1f65be9b34234ea37e011b54 *man/CookDistance.Rd
 7662995cc1d4293e62db91d2ef9aa9a8 *man/ObsvsPred.Rd
@@ -73,4 +73,4 @@ f8ce0f6add3d5e3e096e3ff48381500c *tests/testthat/test-lmmPower.R
 100fb2fcc411a7d8ac479ae4da3bd8c2 *tests/testthat/test-plot_SynergyLMM.R
 816cd7b0528d4266f26ea9178f74a3c1 *tests/testthat/test-utils.R
 a00945ee312151fbc22026c50c7d418c *vignettes/Fig1_LMM_Graphical_Abstract.png
-b7c486ae65e101a1321505e5d792847a *vignettes/SynergyLMM.Rmd
+c9893542a723b120efe7a0fd1945adef *vignettes/SynergyLMM.Rmd

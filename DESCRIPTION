@@ -1,6 +1,6 @@
 Package: SynergyLMM
 Title: Statistical Framework for in Vivo Drug Combination Studies
-Version: 1.0.0
+Version: 1.0.1
 Authors@R: 
     c(person("Rafael", "Romero-Becerra", , "r.r.becerra@medisin.uio.no", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0003-3935-2647")), 
@@ -19,7 +19,7 @@ RoxygenNote: 7.3.2
 Imports: magrittr (>= 2.0.3), rlang, dplyr (>= 1.1.4), ggplot2 (>=
         3.5.1), cowplot (>= 1.1.3), nlme (>= 3.1-165), nlmeU, fBasics,
         car, MASS, performance, lattice, marginaleffects, clubSandwich
-Suggests: knitr, rmarkdown, testthat (>= 3.0.0)
+Suggests: lme4, knitr, rmarkdown, testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Depends: R (>= 4.0)
 LazyData: true
@@ -27,11 +27,11 @@ VignetteBuilder: knitr
 URL: https://github.com/RafRomB/SynergyLMM
 BugReports: https://github.com/RafRomB/SynergyLMM/issues
 NeedsCompilation: no
-Packaged: 2025-02-05 15:05:35 UTC; rafrombec
+Packaged: 2025-02-07 15:39:59 UTC; rafrombec
 Author: Rafael Romero-Becerra [aut, cre]
     (<https://orcid.org/0000-0003-3935-2647>),
   Zhi Zhao [ctb],
   Tero Aittokallio [ctb]
 Maintainer: Rafael Romero-Becerra <r.r.becerra@medisin.uio.no>
 Repository: CRAN
-Date/Publication: 2025-02-06 13:30:02 UTC
+Date/Publication: 2025-02-07 18:10:02 UTC
