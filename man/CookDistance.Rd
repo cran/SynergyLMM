@@ -2,17 +2,30 @@
 % Please edit documentation in R/CookDistance.R
 \name{CookDistance}
 \alias{CookDistance}
-\title{Cook's distance for the coefficient estimates}
+\title{Cook's distance for individual subjects}
 \usage{
-CookDistance(model, cook_thr = NA, label_angle = 0, verbose = TRUE)
+CookDistance(
+  model,
+  type = "fitted",
+  cook_thr = NA,
+  label_angle = 0,
+  maxIter = 1000,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{model}{An object of class "lme" representing the linear mixed-effects model fitted by \code{\link[=lmmModel]{lmmModel()}}.}
 
-\item{cook_thr}{Numeric value indicating the threshold for the Cook's distance. If not specified, the threshold is set to the 90\% percentile of the Cook's
+\item{type}{Type of Cook's distance to calculated. Possible options are \code{fitted}, to calculte Cook's distances
+based on the change in fitted values, or \code{fixef} to calculate Cook's distances based on the change in the fixed effects.
+See Details section for more information.}
+
+\item{cook_thr}{Numeric value indicating the threshold for the Cook's distance. If not specified, the threshold is set to three times the mean of the Cook's
 distance values.}
 
 \item{label_angle}{Numeric value indicating the angle for the label of subjects with a Cook's distance greater than \code{cook_thr}.}
+
+\item{maxIter}{Limit of maximum number of iterations for the optimization algorithm. Default to 1000.}
 
 \item{verbose}{Logical indicating if the subjects with a Cook's distance greater than \code{cook_thr} should be printed to the console.}
 }
@@ -23,17 +36,39 @@ whose Cook's distance is greater than \code{cook_thr}.
 If saved to a variable, the function returns a vector with the Cook's distances for each subject.
 }
 \description{
-\code{CookDistance} allows the user to identify those subjects with a greater influence in the estimation of the
-\eqn{\beta} (tumor growth rate) for the treatment group, based in the calculation of Cook's distances.
+\code{CookDistance} allows the user to identify those subjects with a greater influence in the predicted values or in the estimation of the
+fixed effects for the treatment group, based in the calculation of Cook's distances.
 }
 \details{
-The identification of the subjects with a greater influence in each estimated \eqn{\beta} representing the tumor growth is based on the calculation of Cook's distances, as
-described in Gałecki and Burzykowsk (2013). To compute the Cook's distance for the \eqn{\beta} estimates (i.e., the contribution to each subject to the coefficient of its treatment group),
-first a matrix containing the leave-one-subject-out estimates or \eqn{\beta} is calculated. Then, the Cook's distances are calculated according to:
+The identification of influential subjects is based on the calculation of Cook's distances. The Cook's distances
+can be calculated based on the change in fitted values or fixed effects.
+\itemize{
+\item \strong{Cook's distances based on the change in fitted values}
+}
+
+When \code{type = "fitted"}, the Cook's distances
+are calculated as the normalized change in fitted response values due to the removal of a subject from the model.
+Firts, a leave-one-subject-out model is fitted, removing individually each subject to fit the model. Then, the Cook's
+distance for subject \eqn{i}, (\eqn{D_i}), is calculated as:
+\deqn{D_i=\frac{\sum_{j=1}^n\Bigl(\hat{y}_{j}-\hat{y}_{j_{(-i)}}\Bigl)^2}{rank(X)\cdot MSE}}
+
+where \eqn{\hat{y}_j} is the \eqn{j^{th}} fitted response value using the complete model, and \eqn{\hat{y}_{j_{(-i)}}} is the
+\eqn{j^{th}} fitted response value obtained using the model where subject \eqn{i} has been removed.
+
+The denominator of the expression is equal to the number of the fixed-effects coefficients, which, under the assumption that
+the design matrix is of full rank, is equivalent to the rank of the design matrix, and the Cook distance is normalized by the
+mean square error (\eqn{MSE}) of the model.
+\itemize{
+\item \strong{Cook's distances based on the change in fixed effects values}
+}
+
+The identification of the subjects with a greater influence in the estimated fixed effects is based on the calculation of Cook's distances, as
+described in Gałecki and Burzykowsk (2013). To compute the Cook's distance for the fixed effect estimates (i.e., the contribution to each subject to the coefficients of its treatment group),
+first a matrix containing the leave-one-subject-out estimates or the fixed effects is calculated. Then, the Cook's distances are calculated according to:
 
 \deqn{D_i \equiv  \frac{(\hat{\beta} - \hat{\beta}_{(-i)})[\widehat{Var(\hat{\beta})}]^{-1}(\hat{\beta} - \hat{\beta}_{(-i)})}{rank(X)}}
 
-where \eqn{\hat{\beta}_{(-i)}} is the estimate of the parameter vector \eqn{\beta} obtained by fitting the model to the data with the \eqn{i}-th subject excluded. The denominator of
+where \eqn{\beta} represents the vector of fixed effects and \eqn{\hat{\beta}_{(-i)}} is the estimate of the parameter vector \eqn{\beta} obtained by fitting the model to the data with the \eqn{i}-th subject excluded. The denominator of
 the expression is equal to the number of the fixed-effects coefficients, which, under the assumption that the design matrix is of full rank, is equivalent to the rank of the design matrix.
 }
 \examples{

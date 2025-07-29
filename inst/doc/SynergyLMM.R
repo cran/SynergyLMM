@@ -18,10 +18,35 @@ head(grwth_data)
 unique(grwth_data$Treatment)
 
 ## ----fig.width=12, fig.height=8-----------------------------------------------
-lmm_ex <- lmmModel(data = grwth_data, sample_id = "subject", time = "Time", 
-                   treatment = "Treatment", tumor_vol = "TumorVolume",
-                   trt_control = "Control", drug_a = "DrugA", 
-                   drug_b = "DrugB", combination = "Combination")
+lmm_ex <- lmmModel(
+  data = grwth_data,
+  grwth_model = "exp",
+  sample_id = "subject",
+  time = "Time",
+  treatment = "Treatment",
+  tumor_vol = "TumorVolume",
+  trt_control = "Control",
+  drug_a = "DrugA",
+  drug_b = "DrugB",
+  combination = "Combination"
+)
+
+## ----eval=FALSE---------------------------------------------------------------
+# lmm_gomp <- lmmModel(
+#   data = grwth_data,
+#   grwth_model = "gompertz",
+#   start_values = "selfStart",
+#   sample_id = "subject",
+#   time = "Time",
+#   treatment = "Treatment",
+#   tumor_vol = "TumorVolume",
+#   trt_control = "Control",
+#   drug_a = "DrugA",
+#   drug_b = "DrugB",
+#   combination = "Combination")
+
+## ----echo=FALSE,  fig.width=12, fig.height=8----------------------------------
+knitr::include_graphics("Gompertz_model.png")
 
 ## -----------------------------------------------------------------------------
 lmmModel_estimates(lmm_ex)
@@ -33,11 +58,19 @@ ranefDiagnostics(lmm_ex)
 residDiagnostics(lmm_ex)
 
 ## ----fig.width=12, fig.height=8-----------------------------------------------
-lmm_ex_var <- lmmModel(data = grwth_data, sample_id = "subject", time = "Time", 
-                   treatment = "Treatment", tumor_vol = "TumorVolume",
-                   trt_control = "Control", drug_a = "DrugA", 
-                   drug_b = "DrugB", combination = "Combination",
-                   weights = nlme::varIdent(form = ~1|SampleID))
+lmm_ex_var <- lmmModel(
+  data = grwth_data,
+  sample_id = "subject",
+  time = "Time",
+  treatment = "Treatment",
+  tumor_vol = "TumorVolume",
+  trt_control = "Control",
+  drug_a = "DrugA",
+  drug_b = "DrugB",
+  combination = "Combination",
+  weights = nlme::varIdent(form = ~ 1 | SampleID),
+  show_plot = FALSE
+)
 
 ## -----------------------------------------------------------------------------
 lmmModel_estimates(lmm_ex_var)
@@ -55,11 +88,23 @@ residD$Normality
 ## ----fig.width=10, fig.height=10----------------------------------------------
 ObsvsPred(lmm_ex_var, nrow = 8, ncol = 4)
 
-## ----fig.width=10, fig.height=8-----------------------------------------------
-CookDistance(lmm_ex_var)
+## ----eval=FALSE---------------------------------------------------------------
+# CookDistance(lmm_ex_var, type = "fixef")
 
-## ----fig.width=10, fig.height=8-----------------------------------------------
-logLikSubjectDisplacements(lmm_ex_var, var_name = "SampleID")
+## ----echo=FALSE,  fig.width=10, fig.height=8----------------------------------
+knitr::include_graphics("CooksDistance_fixef.png")
+
+## ----eval=FALSE---------------------------------------------------------------
+# CookDistance(lmm_ex_var, type = "fitted")
+
+## ----echo=FALSE,  fig.width=10, fig.height=8----------------------------------
+knitr::include_graphics("CooksDistance_fitted.png")
+
+## ----eval=FALSE---------------------------------------------------------------
+# logLikSubjectDisplacements(lmm_ex_var, var_name = "SampleID")
+
+## ----echo=FALSE,  fig.width=10, fig.height=8----------------------------------
+knitr::include_graphics("loglikDisp.png")
 
 ## ----error=TRUE---------------------------------------------------------------
 try({
@@ -76,10 +121,10 @@ bliss$Synergy
 hsa <- lmmSynergy(lmm_ex_var, method = "HSA", robust = TRUE, min_time = 6)
 
 ## ----fig.width=12, fig.height=10----------------------------------------------
-ra <- lmmSynergy(lmm_ex_var, method = "RA", robust = TRUE, min_time = 6, ra_nsim = 1000)
+ra <- lmmSynergy(lmm_ex_var, method = "RA", robust = TRUE, min_time = 6, nsim = 100)
 
 ## -----------------------------------------------------------------------------
-PostHocPwr(lmm_ex_var, nsim = 100, method = "Bliss")
+PostHocPwr(lmm_ex_var, nsim = 50, method = "Bliss")
 
 ## -----------------------------------------------------------------------------
 # Vector with the time points

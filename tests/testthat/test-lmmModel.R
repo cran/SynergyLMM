@@ -473,6 +473,91 @@ test_that("lmmModel runs with 3-drug combination", {
   expect_s3_class(result, "lme")
 })
 
+# Test if lmmModel function runs without errors using Gompertz model
+
+set.seed(123)
+test_data <- data.frame(
+  SampleID = rep(1:40, each = 10),
+  Time = rep(0:9, times = 40),
+  Treatment = rep(c("Control", "Drug_A", "Drug_B", "Drug_AB"), each = 10, length.out = 400),
+  TV = rbeta(10, 3, 1)
+)
+
+test_that("lmmModel runs without error on Gompertz model", {
+  result <- lmmModel(
+    data = test_data, 
+    grwth_model = "gompertz",
+    sample_id = "SampleID",
+    time = "Time",
+    treatment = "Treatment",
+    tumor_vol = "TV",
+    trt_control = "Control",
+    drug_a = "Drug_A",
+    drug_b = "Drug_B",
+    combination = "Drug_AB",
+    time_start = 0,
+    time_end = NULL,
+    min_observations = 1,
+    show_plot = FALSE
+  )
+  expect_s3_class(result, c("gompertzlme", "nlme", "lme"))
+})
+
+test_that("lmmModel runs with Gompertz model and selfStart values", {
+  result <- lmmModel(
+    data = test_data, 
+    grwth_model = "gompertz",
+    sample_id = "SampleID",
+    time = "Time",
+    treatment = "Treatment",
+    tumor_vol = "TV",
+    trt_control = "Control",
+    drug_a = "Drug_A",
+    drug_b = "Drug_B",
+    combination = "Drug_AB",
+    time_start = 0,
+    time_end = NULL,
+    min_observations = 1,
+    show_plot = FALSE, 
+    start_values = "selfStart"
+  )
+  expect_s3_class(result, c("gompertzlme", "nlme", "lme"))
+})
+
+
+
+# Test if lmmModel function runs with 3-drug combination and Gompertz model
+
+set.seed(123)
+test_data <- data.frame(
+  SampleID = rep(1:40, each = 10),
+  Time = rep(0:9, times = 40),
+  Treatment = rep(c("Control", "Drug_A", "Drug_B", "Drug_Z", "Drug_ABZ"), each = 10, length.out = 400),
+  TV = rnorm(10, mean = 100, sd = 2)
+)
+
+test_that("lmmModel runs with 3-drug combination and Gompertz model", {
+  result <- lmmModel(
+    data = test_data,
+    grwth_model = "gompertz",
+    sample_id = "SampleID",
+    time = "Time",
+    treatment = "Treatment",
+    tumor_vol = "TV",
+    trt_control = "Control",
+    drug_a = "Drug_A",
+    drug_b = "Drug_B",
+    drug_c = "Drug_Z",
+    combination = "Drug_ABZ",
+    time_start = 0,
+    time_end = NULL,
+    min_observations = 1,
+    show_plot = FALSE
+  )
+  
+  expect_s3_class(result, c("gompertzlme", "nlme", "lme"))
+})
+
 # Test for lmmModel_estimates function ----
 
 set.seed(123)
@@ -489,9 +574,8 @@ test_that("lmmModel_estimates returns a data frame with correct structure", {
   result <- lmmModel_estimates(model)
   
   expect_s3_class(result, "data.frame")
-  expect_equal(ncol(result), 6)  # control, drug_a, drug_b, combination, sd_ranef, sd_resid
-  expect_equal(rownames(result), "estimate")
-  expect_equal(colnames(result), c("Control", "Drug_A", "Drug_B", "Combination", "sd_ranef", "sd_resid"))
+  expect_equal(ncol(result), 10)  # control, sd_control, drug_a, sd_druga, drug_b, sd_drugb, combination, sd_combination, sd_ranef, sd_resid
+  expect_equal(colnames(result), c("Control", "sd_Control","Drug_A","sd_Drug_A","Drug_B", "sd_Drug_B", "Combination", "sd_Combination", "sd_ranef", "sd_resid"))
 })
 
 test_that("lmmModel_estimates returns correct values for coefficients and standard deviations", {
@@ -527,9 +611,8 @@ test_that("lmmModel_estimates returns a data frame with correct structure with 3
   result <- lmmModel_estimates(model)
   
   expect_s3_class(result, "data.frame")
-  expect_equal(ncol(result), 7)  # control, drug_a, drug_b, combination, sd_ranef, sd_resid
-  expect_equal(rownames(result), "estimate")
-  expect_equal(colnames(result), c("Control", "Drug_A", "Drug_B", "Drug_Z","Combination", "sd_ranef", "sd_resid"))
+  expect_equal(ncol(result), 12)  # control, drug_a, drug_b, combination, sd_ranef, sd_resid
+  expect_equal(colnames(result), c("Control", "sd_Control","Drug_A","sd_Drug_A","Drug_B", "sd_Drug_B", "Drug_Z", "sd_Drug_Z", "Combination", "sd_Combination", "sd_ranef", "sd_resid"))
 })
 
 test_that("lmmModel_estimates returns correct values for coefficients and standard deviations", {
@@ -549,5 +632,73 @@ test_that("lmmModel_estimates returns correct values for coefficients and standa
   
   # Check that the standard deviations match the model's random effects and residuals
   expect_equal(result$sd_ranef, sqrt(model$modelStruct$reStruct[[1]][1]))
+  expect_equal(result$sd_resid, model$sigma)
+})
+
+
+test_that("lmmModel_estimates returns robust standard error estimates", {
+  model <- lmmModel(test_data, trt_control = "Control",
+                    drug_a = "Drug_A",
+                    drug_b = "Drug_B",
+                    drug_c = "Drug_Z",
+                    combination = "Drug_ABZ")
+  result <- lmmModel_estimates(model, robust = TRUE, type = "CR2")
+  
+  # Check that the coefficients match the model's fixed effects
+  expect_equal(result$sd_Control, clubSandwich::conf_int(model, vcov = clubSandwich::vcovCR(model, type = "CR2"))[1,3])
+  expect_equal(result$sd_Drug_A, clubSandwich::conf_int(model, vcov = clubSandwich::vcovCR(model, type = "CR2"))[2,3])
+  expect_equal(result$sd_Drug_B, clubSandwich::conf_int(model, vcov = clubSandwich::vcovCR(model, type = "CR2"))[3,3])
+  expect_equal(result$sd_Drug_Z, clubSandwich::conf_int(model, vcov = clubSandwich::vcovCR(model, type = "CR2"))[4,3])
+  expect_equal(result$sd_Combination, clubSandwich::conf_int(model, vcov = clubSandwich::vcovCR(model, type = "CR2"))[5,3])
+  
+  # Check that the standard deviations match the model's random effects and residuals
+  expect_equal(result$sd_ranef, sqrt(model$modelStruct$reStruct[[1]][1]))
+  expect_equal(result$sd_resid, model$sigma)
+})
+
+set.seed(123)
+test_data <- data.frame(
+  SampleID = rep(1:40, each = 10),
+  Time = rep(0:9, times = 40),
+  Treatment = rep(c("Control", "Drug_A", "Drug_B", "Drug_Z", "Drug_ABZ"), each = 10, length.out = 400),
+  TV = rnorm(10, mean = 100, sd = 2)
+)
+
+test_that("lmmModel_estimates returns correct values for coefficients and standard deviations for Gompertz model", {
+  model <- lmmModel(
+    data = test_data,
+    grwth_model = "gompertz",
+    sample_id = "SampleID",
+    time = "Time",
+    treatment = "Treatment",
+    tumor_vol = "TV",
+    trt_control = "Control",
+    drug_a = "Drug_A",
+    drug_b = "Drug_B",
+    drug_c = "Drug_Z",
+    combination = "Drug_ABZ",
+    time_start = 0,
+    time_end = NULL,
+    min_observations = 1,
+    show_plot = FALSE
+  )
+  
+  result <- lmmModel_estimates(model)
+  
+  # Check that the coefficients match the model's fixed effects
+  expect_equal(result$r0.Control, model$coefficients$fixed[[1]])
+  expect_equal(result$r0.Drug_A, model$coefficients$fixed[[2]])
+  expect_equal(result$r0.Drug_B, model$coefficients$fixed[[3]])
+  expect_equal(result$r0.Drug_Z, model$coefficients$fixed[[4]])
+  expect_equal(result$r0.Combination, model$coefficients$fixed[[5]])
+  expect_equal(result$rho.Control, model$coefficients$fixed[[6]])
+  expect_equal(result$rho.Drug_A, model$coefficients$fixed[[7]])
+  expect_equal(result$rho.Drug_B, model$coefficients$fixed[[8]])
+  expect_equal(result$rho.Drug_Z, model$coefficients$fixed[[9]])
+  expect_equal(result$rho.Combination, model$coefficients$fixed[[10]])
+  
+  # Check that the standard deviations match the model's random effects and residuals
+  expect_equal(result$sd_r0_ranef, as.numeric(sqrt(diag(nlme::pdMatrix(model$modelStruct$reStruct[[1]])))[1]))
+  expect_equal(result$sd_rho_ranef, as.numeric(sqrt(diag(nlme::pdMatrix(model$modelStruct$reStruct[[1]])))[2]))
   expect_equal(result$sd_resid, model$sigma)
 })

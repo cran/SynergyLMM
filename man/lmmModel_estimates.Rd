@@ -2,15 +2,28 @@
 % Please edit documentation in R/lmmModel_estimates.R
 \name{lmmModel_estimates}
 \alias{lmmModel_estimates}
+\alias{lmmModel_estimates.explme}
+\alias{lmmModel_estimates.gompertzlme}
 \title{Get estimates from a linear mixed model of tumor growth data}
 \usage{
-lmmModel_estimates(model)
+lmmModel_estimates(model, robust = FALSE, type = "CR2")
+
+\method{lmmModel_estimates}{explme}(model, robust = FALSE, type = "CR2")
+
+\method{lmmModel_estimates}{gompertzlme}(model, robust = FALSE, type = "CR2")
 }
 \arguments{
 \item{model}{An object of class "lme" representing the linear mixed-effects model fitted by \code{\link[=lmmModel]{lmmModel()}}.}
+
+\item{robust}{If TRUE, sandwich-based robust estimators
+of the standard error of the regression coefficient estimates by \code{\link[clubSandwich:conf_int]{clubSandwich::conf_int()}} are provided. Sandwich-based robust estimators
+are only available for exponential growth models ('explme').}
+
+\item{type}{Character string specifying which small-sample adjustment should be used when \code{robust = True}. Available options are "CR0", "CR1", "CR1p", "CR1S", "CR2", or "CR3".
+See "Details" section of \code{\link[clubSandwich:vcovCR]{clubSandwich::vcovCR()}} for further information.}
 }
 \value{
-A data frame with the estimated values for the coefficients of the tumor growth for each treatment,
+A data frame with the estimated values for the coefficients of the tumor growth for each treatment, their standard error,
 the standard deviation of the random effects, and the standard deviation of the residuals of the model.
 These values can be useful for the power analysis of the model using \code{\link[=APrioriPwr]{APrioriPwr()}}.
 }
@@ -21,9 +34,9 @@ such as for power calculation.
 \details{
 The model estimates provided by \code{lmmModel_estimates} include:
 \itemize{
-\item Fixed effect coefficients: \eqn{\hat{\beta}_C}, \eqn{\hat{\beta}_A}, \eqn{\hat{\beta}_B}, \eqn{\hat{\beta}_{AB}},
-which represent the estimated specific growth rates for the Control, Drug A, Drug B and Combination groups, respectively.
-These are shown in columns \code{control}, \code{drug_a}, \code{drug_b}, and \code{combination}, respectively.
+\item Fixed effect coefficients: \eqn{\hat{\beta}_{Control}}, \eqn{\hat{\beta}_A}, \eqn{\hat{\beta}_B}, ( \eqn{\hat{\beta}_{C}}), \eqn{\hat{\beta}_{Combination}},
+which represent the estimated specific growth rates for the Control, Drug A, Drug B, (Drug C, if present), and Combination groups, respectively.
+\item The standard deviation (sd) corresponding to each of the fixed effect coefficients.
 \item Standard deviation of the random effects (between-subject variance). Column \code{sd_ranef}.
 \item Standard deviation of the residuals (within-subject variance). Column \code{sd_resid}.
 }

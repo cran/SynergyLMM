@@ -1,4 +1,4 @@
-#' @importFrom ggplot2 aes annotate arrow geom_hline geom_point geom_segment ggplot guides guide_legend labs scale_fill_gradient2 scale_x_continuous unit xlab ylab
+#' @importFrom ggplot2 aes annotate arrow geom_hline geom_point geom_segment ggplot guides guide_legend labs scale_fill_gradient scale_x_continuous unit xlab ylab
 #' @importFrom rlang .data
 #' @import graphics
 NULL
@@ -44,28 +44,38 @@ NULL
 #' 
 #' @export
 plot_lmmSynergy <- function(syn_data){
+  nsim <- syn_data$nsim
   syn_data <- syn_data$Synergy
   
   syn_data$Metric[syn_data$Metric == "CI"] <- "Combination Index"
   syn_data$Metric[syn_data$Metric == "SS"] <- "Synergy Score"
   
-  if (sum(syn_data$pval == 0) > 1) {
-    ndec <- nchar(strsplit(as.character(min(syn_data$pval[syn_data$pval!=0])), "\\.")[[1]][2])
-    apx_p <- paste("p<",ndec/ndec*10^-(ndec), sep = "")
-    
-    syn_data$pval0 <- rep(NA, nrow(syn_data))
-    syn_data$pval0[syn_data$pval == 0] <- "extreme"
+  if ("padj" %in% colnames(syn_data)) {
+    legend_name <- "Adjusted\np-value"
+  } else {
+    legend_name <- "p-value"
+    syn_data$padj <- syn_data$pval
   }
-  syn_data$log10pval <- -log10(syn_data$pval)
-  syn_data$log10pval[is.infinite(syn_data$log10pval)] <- NA
+  
+  if (sum(syn_data$padj == 0) > 1) {
+    
+    ndec <- strsplit(format(nsim, scientific = T), split = "\\+")[[1]][2]
+    apx_p <- paste("p<1e-",ndec, sep = "")
+    
+    syn_data$padj0 <- rep(NA, nrow(syn_data))
+    syn_data$padj0[syn_data$padj == 0] <- "extreme"
+    syn_data$padj[syn_data$padj == 0] <- NA
+    
+  }
   
   Model <- unique(syn_data$Model)
   
   CI <- syn_data %>% dplyr::filter(.data$Metric == "Combination Index") %>% ggplot(aes(x = .data$Time, y = .data$Estimate)) +
     geom_segment(aes(x= .data$Time, y = .data$lwr, yend = .data$upr), color = "gray60", lwd = 1, 
                  arrow = arrow(angle = 90, length = unit(0.01, "npc"),ends = "both")) + cowplot::theme_cowplot() +
-    geom_point(aes(fill  = .data$log10pval), size = 5, shape = 23, color = "gray60") +
-    scale_fill_gradient2(name = "-log10\np-value", low = "darkorchid4",mid = "gray90", high = "darkcyan",midpoint = 1.3, na.value = "white") +
+    geom_point(aes(fill  = .data$padj), size = 5, shape = 23, color = "gray60") +
+    #scale_fill_gradient2(name = "Adjusted\np-value", high = "darkorchid4",mid = "gray90", low = "darkcyan",midpoint = 0.05, na.value = "white") +
+    scale_fill_gradient(name = legend_name, high = "darkorchid4", low = "#d0f5ec", na.value = "white") +
     ylab("Combination Index") + xlab("Time since start of treatment") + 
     scale_x_continuous(breaks = unique(syn_data$Time)) + 
     geom_hline(yintercept = 1, lty = "dashed") + #facet_wrap(~Metric) + theme(strip.background = element_rect(fill = "cyan4"), strip.text = element_text(color = "white", face = "bold"))
@@ -75,20 +85,28 @@ plot_lmmSynergy <- function(syn_data){
     annotate(geom = "text", x =(min(syn_data$Time)-(syn_data$Time[2]-syn_data$Time[1])), 
              y = 1.05, angle = 90, hjust = 0, label = "Antagonism", fontface = "bold", color = "#c21d2f")
   
-  if (sum(syn_data$pval == 0) > 1) {
+  if (sum(is.na(syn_data$padj)) > 1 & sum(is.na(syn_data$padj)) != length(syn_data$padj)) {
     CI <- CI +
-      geom_point(aes(x = .data$Time, y = .data$Estimate, color = .data$pval0), size = 5, shape = 23) + 
+      geom_point(aes(x = .data$Time, y = .data$Estimate, color = .data$padj0), size = 5, shape = 23) + 
       guides(colours = guide_legend(override.aes = list(size = 5))) +
       scale_color_manual(name = NULL, 
-                         values = c(`pval0` = "extreme"), labels = apx_p) +
+                         values = c(`padj0` = "extreme"), labels = apx_p) +
+      coord_cartesian(clip = "off")
+  } else if (sum(is.na(syn_data$padj)) == length(syn_data$padj)) {
+    CI <- CI +
+      geom_point(aes(x = .data$Time, y = .data$Estimate, color = .data$padj0), size = 5, shape = 23) + 
+      guides(colours = guide_legend(override.aes = list(size = 5))) +
+      scale_color_manual(name = NULL, 
+                         values = "gray60", labels = apx_p) +
       coord_cartesian(clip = "off")
   }
   
   SS <- syn_data %>% dplyr::filter(.data$Metric == "Synergy Score") %>% ggplot(aes(x = .data$Time, y = .data$Estimate)) +
     geom_segment(aes(x= .data$Time, y = .data$lwr, yend = .data$upr), color = "gray60", lwd = 1,
                  arrow = arrow(angle = 90, length = unit(0.01, "npc"),ends = "both")) + cowplot::theme_cowplot() +
-    geom_point(aes(fill  = .data$log10pval), size = 5, shape = 23, color = "gray60") +
-    scale_fill_gradient2(name = "-log10\np-value", low = "darkorchid4",mid = "gray90", high = "darkcyan",midpoint = 1.3, na.value = "white") +
+    geom_point(aes(fill  = .data$padj), size = 5, shape = 23, color = "gray60") +
+    #scale_fill_gradient2(name = "Adjusted\np-value", high = "darkorchid4",mid = "gray90", low = "darkcyan",midpoint = 0.05, na.value = "white") +
+    scale_fill_gradient(name = legend_name, high = "darkorchid4", low = "#d0f5ec", na.value = "white") +
     ylab("Synergy Score") + xlab("Time since start of treatment") +
     scale_x_continuous(breaks = unique(syn_data$Time)) + 
     geom_hline(yintercept = 0, lty = "dashed") + #facet_wrap(~Metric) + theme(strip.background = element_rect(fill = "cyan4"), strip.text = element_text(color = "white", face = "bold"))
@@ -98,12 +116,19 @@ plot_lmmSynergy <- function(syn_data){
     annotate(geom = "text", x = (min(syn_data$Time)-(syn_data$Time[2]-syn_data$Time[1])), 
              y = -0.33, angle = 90, hjust = 1, label = "Antagonism", fontface = "bold", color = "#c21d2f")
   
-  if (sum(syn_data$pval == 0) > 1) {
+  if (sum(is.na(syn_data$padj)) > 1 & sum(is.na(syn_data$padj)) != length(syn_data$padj)) {
     SS <- SS +
-      geom_point(aes(x = .data$Time, y = .data$Estimate, color = .data$pval0), size = 5, shape = 23) + 
+      geom_point(aes(x = .data$Time, y = .data$Estimate, color = .data$padj0), size = 5, shape = 23) + 
       guides(colours = guide_legend(override.aes = list(size = 5))) +
       scale_color_manual(name = NULL, 
-                         values = c(`pval0` = "extreme"), labels = apx_p) +
+                         values = c(`padj0` = "extreme"), labels = apx_p) +
+      coord_cartesian(clip = "off")
+  } else if (sum(is.na(syn_data$padj)) == length(syn_data$padj)) {
+    SS <- SS +
+      geom_point(aes(x = .data$Time, y = .data$Estimate, color = .data$padj0), size = 5, shape = 23) + 
+      guides(colours = guide_legend(override.aes = list(size = 5))) +
+      scale_color_manual(name = NULL, 
+                         values = "gray60", labels = apx_p) +
       coord_cartesian(clip = "off")
   }
   
