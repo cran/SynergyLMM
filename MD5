@@ -1,6 +1,6 @@
-e13f6f0d2c9271628645a562f7ac2e1f *DESCRIPTION
+0b6f91a42babb48c5275bc7facfff412 *DESCRIPTION
 c3672fecfc0e3608705009b71eaef5f4 *NAMESPACE
-f05bed6f6f1faa6db956791d1db0d770 *NEWS.md
+bd8631afefa791424b15cb476a365b9d *NEWS.md
 7909d14b9e89d451f2e42f463dca8de3 *R/APrioriPwr.R
 b9f6e4cb7187a6495cc0dc73dde85433 *R/CookDistance.R
 6c44cd2d37c10107eaaa4ffb78b02885 *R/ObsvsPred.R
@@ -53,7 +53,7 @@ c346075b5943736c9dd325c139a71b2b *man/figures/README-ra_syn-1.png
 e3010b2a03d34fd1c691678469526e7d *man/figures/README-ranef_diag-1.png
 46747e8d3642aa4da2d9a34ddc7fa2ad *man/figures/README-resid_diagnostics-1.png
 2cb5f1b8cea7e0ab93b82ecc65575e4f *man/figures/README-robustSE-1.png
-d2d248437830fc3914ae7eff52b38f84 *man/figures/logo.png
+4c805f16c5aed5eb44e821683fe9531c *man/figures/logo.png
 f428e402228f00a49da3308ddadb0f5b *man/getRTV.Rd
 50462251c37b57d707827c3a2fb35d46 *man/grwth_data.Rd
 cce42ac466126135d2fc0bac6ccbefb2 *man/lmmModel.Rd
@@ -75,7 +75,7 @@ dcbc520159ad857ebcabc134f2122d28 *tests/testthat/test-lmmDiagnostics.R
 fb576fe313da327da7af9f16bf83ccc0 *tests/testthat/test-lmmModel.R
 e91e30251216c64444e2a93ff599f53d *tests/testthat/test-lmmPower.R
 2e69fa943f5c7724fd5c20743c75b277 *tests/testthat/test-lmmSynergy.R
-bde5bae0b3c9ded24b75d9638c64a020 *tests/testthat/test-plot_SynergyLMM.R
+badfb51dbbacd59e30c2e3d933be751d *tests/testthat/test-plot_SynergyLMM.R
 816cd7b0528d4266f26ea9178f74a3c1 *tests/testthat/test-utils.R
 902c5f8fe37f80e0a83ea4af1d0d9b84 *vignettes/CooksDistance_fitted.png
 c1927c16957de5069e0371a76c2b4aed *vignettes/CooksDistance_fixef.png
