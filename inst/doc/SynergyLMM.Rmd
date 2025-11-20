@@ -21,7 +21,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>",
                       fig.align = "center", 
                       out.width = "100%",
                       prompt = TRUE)
-
+options(continue = " ")
 ```
 
 ## Introduction
@@ -33,6 +33,10 @@ We will follow the workflow for the analysis of a longitudinal tumor growth expe
 The following figure represent schematically 'SynergyLMM' workflow:
 
 ![**Overview of the 'SynergyLMM' workflow. a,** The first step is uploading the longitudinal tumor burden-related measurements for the different treatment groups. The input consists of a tabular data in long format with at least 4 columns containing information about the samples IDs, the time points for each measurement, the treatment group, and the tumor measurement. **b,** The input data will then be processed to estimate the linear mixed effect model that fits the tumor growth dynamics for each subject, and estimate the growth rates for each treatment group. **c,**  'SynergyLMM' offer various functions to evaluate the model diagnostics and model performance, as well as for the identification of potential outliers and influential individuals for the model fit and the treatment groups. **d,** Once a proper model with satisfactory diagnostics has been obtained, the statistical assessment of combination effects is performed, with a time dependent estimation of the synergy score and combination index, along with their confidence intervals and statistical significance. The method allows for testing synergy using three reference models: Bliss independence, highest single agent (HSA), and response additivity (RA). **e,** 'SynergyLMM' implements versatile functions to calculate the _post hoc_ power of the experiment and the _a priori_ power by modifying the values of key experimental variables, such as sample size,  follow-up time, or frequency of the measurements.](Fig1_LMM_Graphical_Abstract.png){width="100%"}
+
+## 0. Recommended Workflow
+
+![**Recommended workflow for using SynergyLMM** to assess drug combination effects. HSA: highest single agent. RA: response additivity.](Flowchart_v2.png){width="100%"}
 
 ## 1. Data Upload and Model Fit
 
@@ -117,7 +121,8 @@ lmm_gomp <- lmmModel(
   trt_control = "Control",
   drug_a = "DrugA",
   drug_b = "DrugB",
-  combination = "Combination")
+  combination = "Combination"
+  )
 ```
 
 
@@ -351,7 +356,7 @@ Since we performed 100 simulations, the minimum p-value is 0.01. If we would lik
 
 'SynergyLMM' implements statistical power analysis to improve experimental designs.
 
-_Post-hoc_ and _a priori_ power analysis are only available for models fitted using the exponential growth model.
+_Post-hoc_ and _a priori_ power analysis are only available for models fitted using the **exponential growth** model, and for **Bliss independence** and **HSA** synergy reference models.
 
 ### 4.1 _Post Hoc_ Power Analysis
 
@@ -390,6 +395,7 @@ days <- unique(grwth_data$Time)
 
 # Model estimates
 estimates <- lmmModel_estimates(lmm_ex_var)
+estimates <- round(estimates, 3) # rounding for nicer presentation
 ```
 
 Now, we can evaluate the _a priori_ power for this experiment, varying the sample size per group. For example, let's evaluate how the sample size varies from 1 to 10 subjects per group:
@@ -397,18 +403,19 @@ Now, we can evaluate the _a priori_ power for this experiment, varying the sampl
 ```{r, fig.width=10, fig.height=8}
 PwrSampleSize(npg = 1:10,
               time = days,
-              grwrControl = round(estimates$Control,3),
-              grwrA = round(estimates$DrugA,3),
-              grwrB = round(estimates$DrugB, 3),
-              grwrComb = round(estimates$Combination, 3),
-              sd_ranef = round(estimates$sd_ranef, 3),
-              sgma = round(estimates$sd_resid, 3),
-              method = "Bliss")
+              grwrControl = estimates$Control,
+              grwrA = estimates$DrugA,
+              grwrB = estimates$DrugB,
+              grwrComb = estimates$Combination,
+              sd_ranef = estimates$sd_ranef,
+              sgma = estimates$sd_resid,
+              method = "Bliss",
+              plot_exmpDt = TRUE)
 ```
 
-The plot on the left represents the hypothetical data that we have provided, with the regression lines for each treatment group according to `grwrControl`, `grwrA`, `grwrB`, and `grwrComb` values. The values assigned to `sd_ranef` and `sgma` are also shown.
+The plot on the left represents the hypothetical data that we have provided, with the regression lines for each treatment group according to `grwrControl`, `grwrA`, `grwrB`, and `grwrComb` values. The values assigned to `sd_ranef` and `sgma` are also shown. The `plot_exmpDt` argument allows the user to control whether this plot is displayed.
 
-The plot on the left shows the values of the power calculation depending on the values assigned to `npg`. We can observed that, for this experiment, a sample size of 5 would be enough to reach 0.8 statistical power.
+The plot on the right shows the values of the power calculation depending on the values assigned to `npg`. We can observed that, for this experiment, a sample size of 5 would be enough to reach 0.8 statistical power.
 
 #### Time Power Analysis
 
@@ -441,12 +448,12 @@ Now, the _a priori_ power for the Bliss independence model at different end poin
 PwrTime(npg = npg,
         time = max_time,
         type = "max",
-        grwrControl = round(estimates$Control,3),
-              grwrA = round(estimates$DrugA,3),
-              grwrB = round(estimates$DrugB, 3),
-              grwrComb = round(estimates$Combination, 3),
-              sd_ranef = round(estimates$sd_ranef, 3),
-              sgma = round(estimates$sd_resid, 3),
+        grwrControl = estimates$Control,
+              grwrA = estimates$DrugA,
+              grwrB = estimates$DrugB,
+              grwrComb = estimates$Combination,
+              sd_ranef = estimates$sd_ranef,
+              sgma = estimates$sd_resid,
               method = "Bliss")
 ```
 
@@ -468,12 +475,12 @@ Now, let's analyze the _a priori_ power:
 PwrTime(npg = npg,
         time = freq_time,
         type = "freq",
-        grwrControl = round(estimates$Control,3),
-        grwrA = round(estimates$DrugA,3),
-        grwrB = round(estimates$DrugB, 3),
-        grwrComb = round(estimates$Combination, 3),
-        sd_ranef = round(estimates$sd_ranef, 3),
-        sgma = round(estimates$sd_resid, 3),
+        grwrControl = estimates$Control,
+        grwrA = estimates$DrugA,
+        grwrB = estimates$DrugB,
+        grwrComb = estimates$Combination,
+        sd_ranef = estimates$sd_ranef,
+        sgma = estimates$sd_resid,
         method = "Bliss")
 ```
 The plot at the right shows the power for different number of (evenly) distributed measurements. 2 measurements correspond to an experiment in which the tumor measurements were taken just at the initial time point (day 0), and at the final time point (day 18), while 19 measurements correspond to an experiment in which the measurements were taken every single day, including day 0.
@@ -501,12 +508,12 @@ Then, we can for example, evaluate how the statistical power varies if the drug 
 APrioriPwr(npg = npg, # Sample size per group, calculated above
            time = days, # Time points of measurements, calculated above
            # Model estimates:
-           grwrControl = round(estimates$Control,3),
-           grwrA = round(estimates$DrugA,3),
-           grwrB = round(estimates$DrugB, 3),
-           grwrComb = round(estimates$Combination, 3),
-           sd_ranef = round(estimates$sd_ranef, 3),
-           sgma = round(estimates$sd_resid, 3),
+           grwrControl = estimates$Control,
+           grwrA = estimates$DrugA,
+           grwrB = estimates$DrugB,
+           grwrComb = estimates$Combination,
+           sd_ranef = estimates$sd_ranef,
+           sgma = estimates$sd_resid,
            sd_eval = seq(0.01, 0.1, 0.01),
            sgma_eval = seq(0.01, 1, 0.01),
            grwrComb_eval = seq(-0.05, 0.1, 0.001)
@@ -514,7 +521,7 @@ APrioriPwr(npg = npg, # Sample size per group, calculated above
            
 ```
 
-The red dot and the vertical line in the two plots on the right indicate the power result corresponding to the values assigned to `sd_ranef`,  `sgma`, and `grwrComb`, respectively.
+The red dot and the vertical line in the plots indicate the power result corresponding to the values assigned to `sd_ranef`,  `sgma`, and `grwrComb`, respectively.
 
 The results demonstrate that the power increases as the residual and random effects variances decrease. Furthermore, the plot on the right reveals a U-shaped power profile as a function of the combination group growth rate. This indicates that with lower growth rates (i.e.,  higher effect size), the power is increased for detecting synergy, but it decreases as growth rates approach the expected additive effect under the Bliss independence model until it reaches its minimum. As growth rates exceed the expected additive effect, the power starts to increase again, reflecting the model’s ability to detect negative deviations from additivity (indicating antagonism).
 
@@ -522,3 +529,8 @@ The results demonstrate that the power increases as the residual and random effe
 All these functions constitute an interesting toolbox for the researcher. One may perform a first pilot experiment, and then optimize the study design based on the data from that experiment.
 
 
+## 5. Citation
+
+To cite `SynergyLMM` in publications use:
+
+Romero-Becerra R, Zhao Z, Nebdal D, Müller E, Bergholtz H, Norum JH, Aittokallio T (2025). “Improved analysis of in vivo drug combination experiments with a comprehensive statistical framework and web-tool.” _Nature Communications_, *16*(1), 10151. doi:10.1038/s41467-025-65218-9 <https://doi.org/10.1038/s41467-025-65218-9>.

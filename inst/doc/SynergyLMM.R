@@ -3,7 +3,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>",
                       fig.align = "center", 
                       out.width = "100%",
                       prompt = TRUE)
-
+options(continue = " ")
 
 ## ----setup--------------------------------------------------------------------
 library(SynergyLMM)
@@ -43,7 +43,8 @@ lmm_ex <- lmmModel(
 #   trt_control = "Control",
 #   drug_a = "DrugA",
 #   drug_b = "DrugB",
-#   combination = "Combination")
+#   combination = "Combination"
+#   )
 
 ## ----echo=FALSE,  fig.width=12, fig.height=8----------------------------------
 knitr::include_graphics("Gompertz_model.png")
@@ -132,17 +133,19 @@ days <- unique(grwth_data$Time)
 
 # Model estimates
 estimates <- lmmModel_estimates(lmm_ex_var)
+estimates <- round(estimates, 3) # rounding for nicer presentation
 
 ## ----fig.width=10, fig.height=8-----------------------------------------------
 PwrSampleSize(npg = 1:10,
               time = days,
-              grwrControl = round(estimates$Control,3),
-              grwrA = round(estimates$DrugA,3),
-              grwrB = round(estimates$DrugB, 3),
-              grwrComb = round(estimates$Combination, 3),
-              sd_ranef = round(estimates$sd_ranef, 3),
-              sgma = round(estimates$sd_resid, 3),
-              method = "Bliss")
+              grwrControl = estimates$Control,
+              grwrA = estimates$DrugA,
+              grwrB = estimates$DrugB,
+              grwrComb = estimates$Combination,
+              sd_ranef = estimates$sd_ranef,
+              sgma = estimates$sd_resid,
+              method = "Bliss",
+              plot_exmpDt = TRUE)
 
 ## -----------------------------------------------------------------------------
 max_time <- list(seq(0,9,3), seq(0,12,3), seq(0,15,3), 
@@ -158,12 +161,12 @@ max_time <- list(seq(0,9,3), seq(0,12,3), seq(0,15,3),
 PwrTime(npg = npg,
         time = max_time,
         type = "max",
-        grwrControl = round(estimates$Control,3),
-              grwrA = round(estimates$DrugA,3),
-              grwrB = round(estimates$DrugB, 3),
-              grwrComb = round(estimates$Combination, 3),
-              sd_ranef = round(estimates$sd_ranef, 3),
-              sgma = round(estimates$sd_resid, 3),
+        grwrControl = estimates$Control,
+              grwrA = estimates$DrugA,
+              grwrB = estimates$DrugB,
+              grwrComb = estimates$Combination,
+              sd_ranef = estimates$sd_ranef,
+              sgma = estimates$sd_resid,
               method = "Bliss")
 
 ## -----------------------------------------------------------------------------
@@ -173,12 +176,12 @@ freq_time <- list(seq(0,18,1), seq(0,18,3), seq(0,18,6), seq(0,18,9),seq(0,18,18
 PwrTime(npg = npg,
         time = freq_time,
         type = "freq",
-        grwrControl = round(estimates$Control,3),
-        grwrA = round(estimates$DrugA,3),
-        grwrB = round(estimates$DrugB, 3),
-        grwrComb = round(estimates$Combination, 3),
-        sd_ranef = round(estimates$sd_ranef, 3),
-        sgma = round(estimates$sd_resid, 3),
+        grwrControl = estimates$Control,
+        grwrA = estimates$DrugA,
+        grwrB = estimates$DrugB,
+        grwrComb = estimates$Combination,
+        sd_ranef = estimates$sd_ranef,
+        sgma = estimates$sd_resid,
         method = "Bliss")
 
 ## -----------------------------------------------------------------------------
@@ -188,12 +191,12 @@ estimates
 APrioriPwr(npg = npg, # Sample size per group, calculated above
            time = days, # Time points of measurements, calculated above
            # Model estimates:
-           grwrControl = round(estimates$Control,3),
-           grwrA = round(estimates$DrugA,3),
-           grwrB = round(estimates$DrugB, 3),
-           grwrComb = round(estimates$Combination, 3),
-           sd_ranef = round(estimates$sd_ranef, 3),
-           sgma = round(estimates$sd_resid, 3),
+           grwrControl = estimates$Control,
+           grwrA = estimates$DrugA,
+           grwrB = estimates$DrugB,
+           grwrComb = estimates$Combination,
+           sd_ranef = estimates$sd_ranef,
+           sgma = estimates$sd_resid,
            sd_eval = seq(0.01, 0.1, 0.01),
            sgma_eval = seq(0.01, 1, 0.01),
            grwrComb_eval = seq(-0.05, 0.1, 0.001)
